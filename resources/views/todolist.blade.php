@@ -14,6 +14,7 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -91,6 +92,26 @@
                 <div class="col-sm-3"></div>
             </div>
         </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6">
+                <div id="chat">
+                    <ul id="messages">
+                        <li v-for="message in messages">@{{ message }}</li>
+                    </ul>
+                    <p>@{{ message }}</p>
+                    <form v-on:submit.prevent="send">
+                        <input v-model="message">
+                        <button>Send</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm-3"></div>
+        </div>
+
     </div>
 
     <script>
@@ -179,6 +200,29 @@
                 }
             },
         })
+
+        const socket = io('127.0.0.1:3000');
+
+        const chat = new Vue({
+            el: '#chat',
+            data: {
+                messages: [],
+                message: ''
+            },
+            mounted: function () {
+                socket.on('chat.message', function (message) {
+                    this.messages.push(message);
+                }.bind(this));
+            },
+            methods: {
+                send: function (e) {
+                    socket.emit('chat.message', this.message);
+
+                    this.message = '';
+                }
+            }
+        });
+
     </script>
 </body>
 
